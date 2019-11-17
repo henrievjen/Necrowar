@@ -59,6 +59,7 @@ class AI extends BaseAI {
     this.singleFisher = null;
     this.doubleFisher = null;
     this.towersBuilt = 0;
+    this.singleWraith = null;
 
     // Fill our variables with tile data
     for (let tile of this.player.side) {
@@ -371,6 +372,26 @@ class AI extends BaseAI {
       //     unit.attack(this.enemyCastle.tile);
       //   }
       // }
+    }
+    if(this.builderCount == 82) {
+      this.spawnUnitTile.spawnUnit("wraith");
+      this.singleWraith = this.player.units[this.player.units.length - 1];
+      this.singleWraith.move(this.spawnUnitTile.getNeighbors()[lr]);
+    }
+    if(this.builderCount > 82 && this.singleWraith.health > 0) {
+      console.log(this.spawnUnitTile);
+      console.log(this.singleWraith.tile);
+      while(this.singleWraith.moves > 0) {
+        if(!this.singleWraith.tile.getNeighbors()[lr].isGrass) {
+          this.singleWraith.move(this.singleWraith.tile.getNeighbors()[lr]);
+        }
+        else {
+          this.singleWraith.move(this.singleWraith.tile.getNeighbors()[ud]);
+        }
+        if (this.singleWraith.tile.getNeighbors()[ud].isCastle && unit.moves > 0) {
+          unit.attack(this.enemyCastle.tile);
+        }
+      }
     }
     this.builderCount++;
 
