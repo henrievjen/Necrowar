@@ -427,8 +427,12 @@ class AI extends BaseAI {
     // Note that they are not using their full range
     for (let tower of this.player.towers) {
       let adjacent = tower.tile.getNeighbors();
+      adjacent.push(adjacent[0].getNeighbors());
+      adjacent.push(adjacent[1].getNeighbors());
+      adjacent.push(adjacent[2].getNeighbors());
+      adjacent.push(adjacent[3].getNeighbors());
       for (let tile of adjacent) {
-        if (tile.unit && tile.unit.owner == this.player.opponent) {
+        if (tile.unit && tile.unit.owner == this.player.opponent)  {
           tower.attack(tile)
         }
       }
