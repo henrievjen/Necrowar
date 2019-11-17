@@ -47,17 +47,18 @@ class AI extends BaseAI {
     this.miners = [];
     this.builders = [];
     this.units = [];
+    this.towers = [];
     this.grassByPath = [];
     this.enemyCastle = this.player.opponent.towers[0];
     this.myCastle = this.player.towers[0];
     this.onRightSide = false;
-    this.unitPath = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
     this.builderCount = 0;
     this.singleBuilder = null;
     this.singleMiner = null;
     this.doubleMiner = null;
     this.singleFisher = null;
     this.doubleFisher = null;
+    this.towersBuilt = 0;
 
     // Fill our variables with tile data
     for (let tile of this.player.side) {
@@ -111,6 +112,7 @@ class AI extends BaseAI {
    * @returns {boolean} - Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.
    */
   runTurn() {
+    console.log("BUILDER COUNT: " + this.builderCount);
     // <<-- Creer-Merge: runTurn -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
     // Put your game logic here for runTurn
 
@@ -198,7 +200,6 @@ class AI extends BaseAI {
           this.singleMiner.move(this.singleMiner.tile.getNeighbors()[ud]);
       }
       this.singleMiner.mine(this.singleMiner.tile);
-      this.singleMiner.mine(this.singleMiner.tile);
 
       this.spawnWorkerTile.spawnWorker();
       this.doubleMiner = this.player.units[this.player.units.length-1];
@@ -222,12 +223,11 @@ class AI extends BaseAI {
     }
     if(this.builderCount == 2) {
       // Builder
-      this.singleBuilder.build("arrow");
-
+      this.singleBuilder.build("aoe");
+      this.towers.push(this.player.towers[this.player.towers.length-1]);
+      
       // Miner
-      for(let i = 0; i < 8; i++) {
-        this.singleMiner.mine(this.singleMiner.tile);
-      }
+      this.singleMiner.mine(this.singleMiner.tile);
       this.doubleMiner.move(this.doubleMiner.tile.getNeighbors()[lr]);
       for(let i = 0; i < 6; i++) {
         if(i % 2)
@@ -241,9 +241,7 @@ class AI extends BaseAI {
       for(let i = 0; i < 5; i++) {
         this.singleFisher.move(this.singleFisher.tile.getNeighbors()[lr]);
       }
-      for(let i = 0; i < 3; i++) {
-        this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
-      }
+      this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
       for(let i = 0; i < 8; i++) {
         this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[lr]);
       }
@@ -253,62 +251,127 @@ class AI extends BaseAI {
       this.singleBuilder.move(this.singleBuilder.tile.getNeighbors()[lr]);
 
       // Miner
-      for(let i = 0; i < 8; i++) {
-        this.singleMiner.mine(this.singleMiner.tile);
-      }
+      this.singleMiner.mine(this.singleMiner.tile);
 
       // Fisher
-      for(let i = 0; i < 8; i++) {
-        this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
-      }
+      this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[lr]);
       this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[ud]);
-      for(let i = 0; i < 6; i++) {
-        this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[lr]);
-      }
-      for(let i = 0; i < 2; i++) {
-        this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
-      }
+      this.doubleFisher.move(this.doubleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
     }
     if(this.builderCount == 4) {
       // Builder
       this.singleBuilder.build("aoe");
+      this.towers.push(this.player.towers[this.player.towers.length-1]);
 
       // Miner - Fisher
-      for(let i = 0; i < 8; i++) {
-        this.singleMiner.mine(this.singleMiner.tile);
-        this.doubleMiner.mine(this.doubleMiner.tile);
-        this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
-        this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
-      }
+      this.singleMiner.mine(this.singleMiner.tile);
+      this.doubleMiner.mine(this.doubleMiner.tile);
+      this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
     }
     if(this.builderCount == 5) {
       // Builder
       if(this.singleBuilder.build("aoe")) {
+        this.towers.push(this.player.towers[this.player.towers.length-1]);
         this.singleBuilder.move(this.singleBuilder.tile.getNeighbors()[lr]);
       }
 
       // Miner - Fisher
-      for(let i = 0; i < 8; i++) {
-        this.singleMiner.mine(this.singleMiner.tile);
-        this.doubleMiner.mine(this.doubleMiner.tile);
-        this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
-        this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
-      }
+      this.singleMiner.mine(this.singleMiner.tile);
+      this.doubleMiner.mine(this.doubleMiner.tile);
+      this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
     }
-    // if(this.builderCount > 5 && this.builderCount < 20) {
-    //   // Builder
-    //   if(this.singleBuilder.build("aoe")) {
-    //     this.this.singleBuilder.move(this.singleBuilder.tile.getNeighbors()[1]);
-    //   }
+    if(this.builderCount > 5 && this.builderCount < (153 / 2)) {
+      // Builder
+      if(this.builderCount % 5) {
+        if(this.towersBuilt % 4 == 0) {
+          if(this.singleBuilder.build("cleansing")) {
+            this.towers.push(this.player.towers[this.player.towers.length-1]);
+            this.singleBuilder.move(this.singleBuilder.tile.getNeighbors()[lr]);
+          }
+        }
+        if(this.towersBuilt % 4 == 1) {
+          if(this.singleBuilder.build("ballista")) {
+            this.towers.push(this.player.towers[this.player.towers.length-1]);
+            this.singleBuilder.move(this.singleBuilder.tile.getNeighbors()[lr]);
+          }
+        }
+        if(this.towersBuilt % 4 == 2) {
+          if(this.singleBuilder.build("arrow")) {
+            this.towers.push(this.player.towers[this.player.towers.length-1]);
+            this.singleBuilder.move(this.singleBuilder.tile.getNeighbors()[lr]);
+          }
+        }
+        if(this.towersBuilt % 4 == 3) {
+          if(this.singleBuilder.build("aoe")) {
+            this.towers.push(this.player.towers[this.player.towers.length-1]);
+            this.singleBuilder.move(this.singleBuilder.tile.getNeighbors()[lr]);
+          }
+        }
+        this.towersBuilt++;
+      }
 
-    //   // Miner - Fisher
-    //   for(let i = 0; i < 8; i++) {
-    //     this.singleMiner.mine(this.singleMiner.tile);
-    //     this.doubleMiner.mine(this.doubleMiner.tile);
-    //     this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
-    //     this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
-    //   }
-    // }
+      // Miner - Fisher
+      this.singleMiner.mine(this.singleMiner.tile);
+      this.doubleMiner.mine(this.doubleMiner.tile);
+      this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
+    }
+    if(this.builderCount > (153/2)) {
+      console.log('inside builder count > 153 if');
+      this.singleBuilder.fish(this.singleFisher.tile.getNeighbors()[lr]);
+      this.singleMiner.mine(this.singleMiner.tile);
+      this.doubleMiner.mine(this.doubleMiner.tile);
+      this.singleFisher.fish(this.singleFisher.tile.getNeighbors()[lr]);
+      this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
+
+      // if(this.builderCount % 3 == 0) {
+      //   if (this.spawnUnitTile.spawnUnit("ghoul")) {
+      //     this.units.push(this.player.units[this.player.units.length-1]);
+      //   }
+      // }
+      // for (let unit of this.units) {
+      //   while(unit.moves > 0) {
+      //     console.log("WHILE LOOP RAN");
+      //     if(!unit.tile.getNeighbors()[lr].getNeighbors()[lr].isGrass) {
+      //       console.log("MOVED LR");
+      //       unit.move(unit.tile.getNeighbors()[lr]);
+      //     }
+      //     else {
+      //       console.log("MOVED UD");
+      //       unit.move(unit.tile.getNeighbors()[ud]);
+      //     }
+      //     if (unit.tile.getNeighbors()[ud].isCastle && unit.moves > 0) {
+      //       unit.attack(this.enemyCastle.tile);
+      //     }
+      //   }
+      // }
+    
+ 
+      // console.log('before spawned at: ' + this.builderCount);
+      // if (this.spawnUnitTile.spawnUnit("ghoul")) {
+      //   console.log('spawned');
+      //   this.units.push(this.player.units[this.player.units.length-1]);
+      // }
+      // for (let unit of this.units) {
+      //   let path = this.findPath(unit.tile, this.enemyCastle.tile);
+      //   for (let tile of path) {
+      //     if (unit.moves <= 0) {
+      //       break;
+      //     }
+      //     unit.move(tile);
+      //   }
+      //   if (path.length == 0 && unit.moves > 0) {
+      //     unit.attack(this.enemyCastle.tile);
+      //   }
+      // }
+    }
     this.builderCount++;
 
     // if (this.units.length == 0) {
@@ -318,47 +381,47 @@ class AI extends BaseAI {
     // }
     
     // Activate the units
-    for (let i = 0; i < this.miners.length; i++) {
-      if (this.miners[i].tile.isGoldMine) {
-        this.miners[i].mine(this.miners[i].tile);
-      }
-      else {
-        let path = this.findPathWorker(this.miners[i].tile, this.goldMines[1]);
-        for (let tile of path) {
-          if (this.miners[i].moves <= 0) {
-            break;
-          }
-          this.miners[i].move(tile);
-        }
-      }
-    }
-
-    for (let builder of this.builders) {
-      let path = this.findPathWorker(builder.tile, this.goldMines[1]);
-      for (let tile of path) {
-        if (builder.moves <= 0) {
-          break;
-        }
-        builder.move(tile);
-      }
-      if (path.length == 0 && builder.moves > 0)
-        builder.build("arrow");
-    }
-
-    // for (let unit of this.units) {
-    //   // let path = this.findPath(unit.tile, this.enemyCastle.tile);
-    //   // for (let tile of path) {
-    //   //   if (unit.moves <= 0) {
-    //   //     break;
-    //   //   }
-    //   //   unit.move(tile);
-    //   // }
-    //   // if (path.length == 0 && unit.moves > 0) {
-    //   //   unit.attack(this.enemyCastle.tile);
-    //   // }
-    //     unit.move(unit.tile.getNeighbors()[this.unitPath[1]]);
-    //     unit.move(unit.tile.getNeighbors()[this.unitPath[1]]);
+    // for (let i = 0; i < this.miners.length; i++) {
+    //   if (this.miners[i].tile.isGoldMine) {
+    //     this.miners[i].mine(this.miners[i].tile);
+    //   }
+    //   else {
+    //     let path = this.findPathWorker(this.miners[i].tile, this.goldMines[1]);
+    //     for (let tile of path) {
+    //       if (this.miners[i].moves <= 0) {
+    //         break;
+    //       }
+    //       this.miners[i].move(tile);
+    //     }
+    //   }
     // }
+
+    // for (let builder of this.builders) {
+    //   let path = this.findPathWorker(builder.tile, this.goldMines[1]);
+    //   for (let tile of path) {
+    //     if (builder.moves <= 0) {
+    //       break;
+    //     }
+    //     builder.move(tile);
+    //   }
+    //   if (path.length == 0 && builder.moves > 0)
+    //     builder.build("arrow");
+    // }
+
+    // // for (let unit of this.units) {
+    // //   // let path = this.findPath(unit.tile, this.enemyCastle.tile);
+    // //   // for (let tile of path) {
+    // //   //   if (unit.moves <= 0) {
+    // //   //     break;
+    // //   //   }
+    // //   //   unit.move(tile);
+    // //   // }
+    // //   // if (path.length == 0 && unit.moves > 0) {
+    // //   //   unit.attack(this.enemyCastle.tile);
+    // //   // }
+    // //     unit.move(unit.tile.getNeighbors()[this.unitPath[1]]);
+    // //     unit.move(unit.tile.getNeighbors()[this.unitPath[1]]);
+    // // }
 
     // Make towers attack anything adjacent to them
     // Note that they are not using their full range
