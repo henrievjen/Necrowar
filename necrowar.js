@@ -41,8 +41,8 @@ class AI extends BaseAI {
     // <<-- Creer-Merge: start -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
     // add your own start logic here
     // Set up varibales to track all relevant information
-    this.spawnUnitTile = None
-    this.spawnWorkerTile = None
+    this.spawnUnitTile = null
+    this.spawnWorkerTile = null
     this.goldMines = []
     this.miners = []
     this.builders = []
@@ -50,19 +50,20 @@ class AI extends BaseAI {
     this.grassByPath = []
     this.enemyCastle = this.player.opponent.towers[0]
     this.myCastle = this.player.towers[0]
+    this.onRightSide = false;
 
     // Fill our variables with tile data
     for (let tile of this.player.side) {
       if (tile.isUnitSpawn)
             this.spawnUnitTile = tile
-        else if (tile.isUnitSpawn)
+        else if (tile.isWorkerSpawn)
             this.spawnWorkerTile = tile
         else if (tile.isGoldMine)
-            this.goldMines.append(tile)
+            this.goldMines.push(tile)
         else if (tile.isGrass)
             for (let neighbor of tile.getNeighbors())
                 if (neighbor.isPath)
-                    this.grassByPath.append(tile)
+                    this.grassByPath.push(tile)
     }
         
     // Now we should have our spawn tiles, mines, and tower building locations!
@@ -105,62 +106,121 @@ class AI extends BaseAI {
     this.builders = this.builders.filter((builder) => {builder.health > 0});
     this.units = this.units.filter((unit) => {unit.health > 0});
 
+    // if (this.miners.length == 0) {
+    //   if (this.spawnWorkerTile.spawnWorker()) {
+    //     this.miners.push(this.player.units[this.player.units.length-1]);
+    //   }
+    // }
+    
+    this.spawnWorkerTile.spawnWorker();
+    let currentMiner = this.player.units[this.player.units.length-1];
+
+    if(this.spawnWorkerTile.getNeighbors()[3].getNeighbors()[3].isPath) {
+      this.onRightSide = true;
+    }
+    else {
+      this.onRightSide = false;
+    }
+
+    if(this.onRightSide) {
+      // let arrG5 = [1, 1, 1, 1, 1, 1, 1, 1];
+      // let arrG6 = [1, 1, 1, 1, 1, 1, 1, 2];
+
+      // currentMiner.move(this.spawnWorkerTile.getNeighbors()[arrG5[0]]);
+      // console.log(currentMiner.moves);
+      // currentMiner.move(currentMiner..getNeighbors()[arrG5[1]]);
+      // for(let i = 0; i < arrG5.length; i++) {
+      //   currentMiner.move(this.spawnWorkerTile.getNeighbors()[arrG5[i]]);
+      // }
+      // for(let i = 0; i < arrG6.length; i++) {
+      //   currentMiner.move(this.spawnWorkerTile.getNeighbors()[arrG6[i]]);
+      // }
+      let path = this.findPathWorker(currentMiner.tile, this.enemyCastle);
+      for (let tile of path) {
+        if (currentMiner.moves <= 0)
+          break;
+        miner.move(tile);
+      }
+    }
+    else {
+      currentMiner.move(this.spawnWorkerTile.getNeighbors()[3]);
+    }
+
+
     // Spawn all three of our chosen unit types if necessary
-    if (this.miners.length == 0)
-      if (this.spawnWorkerTile.spawnWorker())
-        this.miners.push(this.player.units[this.player.units.length-1]);
-    
-    if (this.builders.length == 0)
-      if (this.spawnWorkerTile.spawnWorker())
+    if (this.builders.length == 0) {
+      if (this.spawnWorkerTile.spawnWorker()) {
         this.builders.push(this.player.units[this.player.units.length-1]);
+      }
+    }
     
-    if (this.units.length == 0)
-      if (this.spawnUnitTile.spawnUnit("ghoul"))
+    if (this.units.length == 0) {
+      if (this.spawnUnitTile.spawnUnit("ghoul")) {
         this.units.push(this.player.units[this.player.units.length-1]);
-    
+      }
+    }
+    // console.log("------------");
+    // console.log(this.miners);
+    // console.log(this.builders);
+    // console.log(this.units);
+    // console.log("------------");
     // Activate the units
     for (let miner of this.miners) {
-      if (miner.tile.isGoldMine)
+      if (miner.tile.isGoldMine) {
         miner.mine(miner.tile);
+      }
       else {
-        path = this.findPathWorker(miner.tile, this.enemyCastle);
+        let path = this.findPathWorker(miner.tile, this.enemyCastle);
         for (let tile of path) {
-          if (miner.moves <= 0)
+          if (miner.moves <= 0) {
             break;
+          }
           miner.move(tile);
         }
       }
     }
 
     for (let builder of this.builders) {
-      path = this.findPathWorker(builder.tile, this.goldMines[0]);
+      let path = this.findPathWorker(builder.tile, this.goldMines[0]);
       for (let tile of path) {
-        if (builder.moves <= 0)
+        if (builder.moves <= 0) {
           break;
+        }
         builder.move(tile);
       }
-      if (path.length == 0 && builder.moves > 0)
+      if (path.length == 0 && builder.moves > 0) {
         builder.build("arrow");
+      }
     }
 
     for (let unit of this.units) {
-      path = this.findPath(unit.tile, this.enemyCastle.tile);
+      let path = this.findPath(unit.tile, this.enemyCastle.tile);
       for (let tile of path) {
-        if (unit.moves <= 0)
+        if (unit.moves <= 0) {
           break;
+        }
         unit.move(tile);
       }
-      if (path.length == 0 && unit.moves > 0)
+      if (path.length == 0 && unit.moves > 0) {
         unit.attack(this.enemyCastle.tile);
+      }
     }
 
     // Make towers attack anything adjacent to them
-    // Note that they are not using their full range
-    for (let tower of this.player.towers)
-        adjacent = tower.tile.getNeighbors();
-        for (let tile of adjacent)
-            if (tile.unit && tile.unit.owner == this.player.opponent)
+    // The towers should now be using their full range
+    for (let tower of this.player.towers) {
+        let adjacent = tower.tile.getNeighbors();
+        for (let tile of adjacent) {
+            if (tile.unit && tile.unit.owner == this.player.opponent) {
                 tower.attack(tile)
+            }
+            let neighborsOfNeighbors = tile.getNeighbors();
+            for(let tile of neighborsOfNeighbors)
+              if (tile.unit && tile.unit.owner == this.player.opponent) {
+                tower.attack(tile)
+              }
+        }
+    }
     
     return true;
     // <<-- /Creer-Merge: runTurn -->>
@@ -226,7 +286,7 @@ class AI extends BaseAI {
   //<<-- Creer-Merge: functions -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
   // any additional functions you want to add for your AI
   findPathWorker(start, goal) {
-    if (start === goal) {
+    if (start == goal) {
       // no need to make a path to here...
       return [];
     }
@@ -248,12 +308,12 @@ class AI extends BaseAI {
       // cycle through the tile's neighbors.
       for (const neighbor of inspect.getNeighbors()) {
         // if we found the goal, we have the path!
-        if (neighbor === goal) {
+        if (neighbor == goal) {
           // Follow the path backward to the start from the goal and return it.
           let path = [goal];
 
           // Starting at the tile we are currently at, insert them retracing our steps till we get to the starting tile
-          while (inspect !== start) {
+          while (inspect != start) {
             path.unshift(inspect);
             inspect = cameFrom[inspect.id];
           }
@@ -263,7 +323,7 @@ class AI extends BaseAI {
         // else we did not find the goal, so enqueue this tile's neighbors to be inspected
 
         // if the tile exists, has not been explored or added to the fringe yet, and it is pathable
-        if (neighbor && neighbor.id && !cameFrom[neighbor.id] && neighbor.isPathableWorker()) {
+        if (neighbor && neighbor.id && !cameFrom[neighbor.id] && neighbor.isPathable()) {
           // add it to the tiles to be explored and add where it came from for path reconstruction.
           fringe.push(neighbor);
           cameFrom[neighbor.id] = inspect;
