@@ -113,7 +113,6 @@ class AI extends BaseAI {
    * @returns {boolean} - Represents if you want to end your turn. True means end your turn, False means to keep your turn going and re-call this function.
    */
   runTurn() {
-    console.log("BUILDER COUNT: " + this.builderCount);
     // <<-- Creer-Merge: runTurn -->> - Code you add between this comment and the end comment will be preserved between Creer re-runs.
     // Put your game logic here for runTurn
 
@@ -325,7 +324,6 @@ class AI extends BaseAI {
       this.doubleFisher.fish(this.doubleFisher.tile.getNeighbors()[lr]);
     }
     if(this.builderCount > (153/2)) {
-      console.log('inside builder count > 153 if');
       this.singleBuilder.fish(this.singleFisher.tile.getNeighbors()[lr]);
       this.singleMiner.mine(this.singleMiner.tile);
       this.doubleMiner.mine(this.doubleMiner.tile);
@@ -379,17 +377,16 @@ class AI extends BaseAI {
       this.singleWraith.move(this.spawnUnitTile.getNeighbors()[lr]);
     }
     if(this.builderCount > 82 && this.singleWraith.health > 0) {
-      console.log(this.spawnUnitTile);
-      console.log(this.singleWraith.tile);
       while(this.singleWraith.moves > 0) {
+        if (this.singleWraith.tile.getNeighbors()[ud].isCastle && unit.moves > 0) {
+          unit.attack(this.enemyCastle.tile);
+          break;
+        }
         if(!this.singleWraith.tile.getNeighbors()[lr].isGrass) {
           this.singleWraith.move(this.singleWraith.tile.getNeighbors()[lr]);
         }
         else {
           this.singleWraith.move(this.singleWraith.tile.getNeighbors()[ud]);
-        }
-        if (this.singleWraith.tile.getNeighbors()[ud].isCastle && unit.moves > 0) {
-          unit.attack(this.enemyCastle.tile);
         }
       }
     }
